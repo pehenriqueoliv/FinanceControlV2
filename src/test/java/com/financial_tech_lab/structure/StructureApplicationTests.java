@@ -1,0 +1,13 @@
+package com.financial_tech_lab.structure;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+@SpringBootTest
+@ActiveProfiles("test")
+class StructureApplicationTests {
+
+    @Test
+    void contextLoads() {}
+}

@@ -1,0 +1,59 @@
+services:
+  financial-lab-localstack:
+    image: localstack/localstack:3.6.0
+    environment:
+      - DATA_DIR=./localstack/s3-entradas/
+      - SERVICES=s3,sqs,secretsmanager
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - ./localstack/init:/etc/localstack/init/ready.d
+      - ./localstack/s3-entradas:/s3-files
+      - ./localstack/secrets:/secrets
+    ports:
+      - "5566-5599:4566-4599"
+  financial-lab-redis:
+    image: redis
+    ports:
+      - ${REDIS_DOCKER_PORT}
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+
+  financial-lab-postgresql:
+    image: postgres
+    restart: always
+    ports:
+      - ${DB_DOCKER_PORT}
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db/dumps:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  financial-lab-prometheus:
+    image: prom/prometheus
+    ports:
+      - ${PROMETHEUS_DOCKER_PORT}
+    volumes:
+      - ./observability/prometheus:/etc/prometheus
+
+  structure-app:
+    build: ..
+    container_name: structure-app
+    ports:
+      - "3000:3000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    env_file:
+      - .env
+    depends_on:
+      financial-lab-postgresql:
+        condition: service_healthy
+      financial-lab-redis:
+        condition: service_started
