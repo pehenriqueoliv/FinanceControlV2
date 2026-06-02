@@ -55,20 +55,20 @@ graph TB
     subgraph Infra["Infraestrutura - Docker Compose"]
         Postgres[(PostgreSQL)]
         Redis[(Redis Cache)]
-        LocalStack[LocalStack<br/>SQS + Secrets Manager]
+        LocalStack[LocalStack - SQS + Secrets Manager]
         Prometheus[Prometheus]
         Grafana[Grafana]
     end
 
-    Cliente -->|HTTP/REST| Controllers
+    Cliente -->|HTTP REST| Controllers
     Controllers --> Services
     Services -->|JPA| Postgres
-    Services -->|@Cacheable| Redis
+    Services -->|Cache| Redis
     Services --> Producers
     Producers -->|publica| LocalStack
     LocalStack -->|consome| Consumers
 
-    Aplicacao -.->|/actuator/prometheus| Prometheus
+    Aplicacao -.->|metrics| Prometheus
     Grafana -->|consulta| Prometheus
     Services -.->|busca credenciais| LocalStack
 ```
