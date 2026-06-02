@@ -1,20 +1,20 @@
+spring.config.import: "aws-secretsmanager:finance-control/database"
+
 spring:
   application:
-    name: structure
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+    name: financecontrol
   jpa:
     properties:
       hibernate:
-        default_schema: financial_lab_structure
+        default_schema: finance_db
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
   datasource:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     driver-class-name: org.postgresql.Driver
-    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/financial_lab_structure}
-    username: ${DB_USER:root}
-    password: ${DB_PASSWORD:root}
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/finance_db}
+    username: ${username}
+    password: ${password}
 
   data:
     redis:
@@ -22,33 +22,21 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:root}
 
-aws:
-  region: ${AWS_REGION}
-  s3:
-    example-documents: ${S3_EXAMPLE_DOCUMENTS}
-    path-example-documents: ${S3_PATH_EXAMPLE_DOCUMENTS}
-
-feign:
-  client:
-    config:
-      default:
-        logger-level: warn
-  okhttp:
-    enabled: true
+spring.cloud:
+  aws:
+    region:
+      static: ${AWS_REGION:us-east-1}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY:local_access}
+      secret-key: ${AWS_SECRET_KEY:local_secret}
+    endpoint: ${LOCALSTACK_URL:http://localhost:5566}
 
 server:
   port: ${SERVER_PORT:8080}
-  ssl:
-    enabled: ${ENABLE_SSL:false}
-    client-auth: none
-    key-store: ${SSL_CERT_PATH}
-    key-store-password: ${SSL_CERT_PASS}
-    key-store-type: ${SSL_STORE_TYPE}
-    key-alias: ${SSL_CERT_ALIAS}
 
 management:
   server:
-    port: ${PROMETHEUS_PORT:9090}
+    port: ${PROMETHEUS_PORT:9091}
   endpoints:
     web:
       exposure:
@@ -59,3 +47,6 @@ management:
     export:
       prometheus:
         enabled: true
+
+app:
+  simulate-consumer-failure: false

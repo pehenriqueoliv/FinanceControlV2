@@ -1,59 +1,62 @@
 services:
-  financial-lab-localstack:
+  financecontrol-localstack:
     image: localstack/localstack:3.6.0
+    container_name: financecontrol-localstack
     environment:
-      - DATA_DIR=./localstack/s3-entradas/
-      - SERVICES=s3,sqs,secretsmanager
+      - SERVICES=sqs,secretsmanager
       - DEFAULT_REGION=us-east-1
     volumes:
       - ./localstack/init:/etc/localstack/init/ready.d
-      - ./localstack/s3-entradas:/s3-files
-      - ./localstack/secrets:/secrets
     ports:
       - "5566-5599:4566-4599"
-  financial-lab-redis:
+
+  financecontrol-redis:
     image: redis
+    container_name: financecontrol-redis
     ports:
       - ${REDIS_DOCKER_PORT}
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=${REDIS_PASSWORD}
 
-  financial-lab-postgresql:
+  financecontrol-postgresql:
     image: postgres
+    container_name: financecontrol-postgresql
     restart: always
     ports:
       - ${DB_DOCKER_PORT}
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ./db/dumps:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: [ "CMD-SHELL", "pg_isready -U root -d ${DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  financial-lab-prometheus:
+  financecontrol-prometheus:
     image: prom/prometheus
+    container_name: financecontrol-prometheus
     ports:
       - ${PROMETHEUS_DOCKER_PORT}
     volumes:
       - ./observability/prometheus:/etc/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  structure-app:
-    build: ..
-    container_name: structure-app
+  financecontrol-grafana:
+    image: grafana/grafana:11.3.0
+    container_name: financecontrol-grafana
     ports:
       - "3000:3000"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-    env_file:
-      - .env
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
-      financial-lab-postgresql:
-        condition: service_healthy
-      financial-lab-redis:
-        condition: service_started
+      - financecontrol-prometheus

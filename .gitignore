@@ -1,8 +1,15 @@
+### Maven ###
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Variáveis de ambiente (NUNCA versionar) ###
 setup/.env
+*.env.local
+
+### Claude Code ###
+.claude/
 
 ### STS ###
 .apt_generated
@@ -31,3 +38,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+logs/
+
+### Sistema Operacional ###
+.DS_Store
+Thumbs.db
+Desktop.ini

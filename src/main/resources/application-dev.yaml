@@ -1,17 +1,21 @@
+spring.config.import: "aws-secretsmanager:finance-control/database"
+
 spring:
   datasource:
     url: ${JDBC_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    username: ${username}
+    password: ${password}
 
-data:
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
 
-cloud:
+spring.cloud:
   aws:
-    region: ${AWS_REGION}
+    region:
+      static: ${AWS_REGION}
     credentials:
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}

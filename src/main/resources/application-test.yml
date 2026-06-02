@@ -8,3 +8,23 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+
+spring.cloud:
+  aws:
+    region:
+      static: us-east-1
+    credentials:
+      access-key: test
+      secret-key: test
+    sqs:
+      enabled: false
+    secretsmanager:
+      enabled: false
+
+management:
+  health:
+    redis:
+      enabled: false
